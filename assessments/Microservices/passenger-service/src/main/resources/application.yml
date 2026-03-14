@@ -1,0 +1,41 @@
+
+server:
+  port: 6606
+
+spring:
+  application:
+    name: PASSENGER-SERVICE
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8083/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${server.port}
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      carrentalService:
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+
+  ratelimiter:
+    instances:
+      carrentalService:
+        limitForPeriod: 2
+        limitRefreshPeriod: 10s
+        timeoutDuration: 2s
+

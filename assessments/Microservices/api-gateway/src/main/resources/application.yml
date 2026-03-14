@@ -1,0 +1,70 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    config:
+      enabled: false
+
+    gateway:
+      routes:
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceCircuitBreaker
+                fallbackUri: forward:/userFallback
+
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderServiceCircuitBreaker
+                fallbackUri: forward:/orderFallback
+
+        - id: carrentals-service
+          uri: lb://CARENTALS-SERVICE
+          predicates:
+            - Path=/rentalcardetails/**,/bookingdetails/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: carrentalServiceCircuitBreaker
+                fallbackUri: forward:/carrentalFallback
+
+        - id: passenger-service
+          uri: lb://PASSENGER-SERVICE
+          predicates:
+            - Path=/passengerdetails/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: passengerServiceCircuitBreaker
+                fallbackUri: forward:/passengerFallback
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8083/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
